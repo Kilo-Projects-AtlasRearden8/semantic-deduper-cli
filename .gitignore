@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+.build/
+.dist/
+.pytest_cache/
+.cache/
+.semantic_deduper_store.json
+dedupe_report.csv
+*.csv

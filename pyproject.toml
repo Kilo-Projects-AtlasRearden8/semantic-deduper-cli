@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "semantic-deduper"
+version = "0.1.0"
+description = "Local-first CLI that finds near-duplicate notes and ideas in text files using fuzzy matching."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+authors = [{name = "Asdale Dynamics, LLC"}]
+keywords = ["deduplication", "fuzzy-matching", "notes", "cli", "local-first"]
+
+[project.scripts]
+semantic-deduper = "semantic_deduper.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["semantic_deduper*"]
