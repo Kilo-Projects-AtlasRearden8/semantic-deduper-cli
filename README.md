@@ -1,22 +1,24 @@
 # semantic-deduper
 
-A local-first Python CLI that finds near-duplicate notes and ideas in your text
-files using fuzzy matching, then groups the candidates for review.
+A friendly, local-first Python CLI that finds near-duplicate notes and ideas in
+your text files using fuzzy matching, then groups the candidates so you can
+review them in a spreadsheet.
 
-Built and published by **Asdale Dynamics, LLC** (Indiana, formed October 2026)
-— beginner-friendly AI education, books, and practical local-first tools.
+Built by **Asdale Dynamics, LLC** (Indiana, formed October 2026) —
+beginner-friendly AI education, books, and practical local-first tools.
 Learn more at dylanasdale.github.io.
 
-No API keys. No cloud. No accounts. Everything runs on your machine with
-Python's standard library only.
+No API keys. No cloud. No accounts. No personal data leaves your computer.
+Everything runs on your machine with Python's standard library only.
 
-## What it does
+## Who this is for
 
-- Scans a folder (recursively) for `.txt` and `.md` files
-- Compares every pair of notes with `difflib` fuzzy matching (SequenceMatcher)
-- Groups near-duplicates into review groups using union-find clustering
-- Saves results to a local JSON store (`--store`)
-- Exports a CSV report (`--output`) you can open in any spreadsheet
+You keep notes, ideas, meeting summaries, or drafts in `.txt` and `.md` files.
+Over time, duplicates creep in — the same thought saved twice, a near-identical
+meeting recap, a paragraph you reused. This tool finds those near-duplicates
+and groups them so you can decide what to keep, merge, or delete.
+
+No AI background needed. If you can open a terminal, you can use this.
 
 ## Install
 
@@ -26,21 +28,28 @@ cd semantic-deduper-cli
 pip install .
 ```
 
+That installs the `semantic-deduper` command. If your Python installation
+blocks installs (some systems do), add `--break-system-packages`:
+
+```bash
+pip install . --break-system-packages
+```
+
 Or run without installing:
 
 ```bash
-python -m semantic_deduper.cli scan .
+python3 -m semantic_deduper scan .
 ```
 
-## Usage
+## Step 1: Scan your notes
 
-Scan a folder for near-duplicates:
+Pick a folder full of notes and scan it:
 
 ```bash
 semantic-deduper scan ./notes --threshold 0.85 --min-length 30
 ```
 
-Output:
+You will see something like:
 
 ```
 Scanned 42 text file(s) in ./notes
@@ -49,41 +58,51 @@ Review groups: 3
 Local store written to .semantic_deduper_store.json
 ```
 
-Export a CSV report from a saved store:
+### What the options mean
+
+- `./notes` — the folder to scan (defaults to the current folder).
+- `--threshold 0.85` — how similar two notes must be to count as a match,
+  from 0.0 to 1.0. Higher means stricter. Default: 0.85.
+- `--min-length 30` — skip files shorter than this many characters.
+  Default: 20. Use this to ignore tiny fragments.
+- `--extensions .txt .md` — file types to include. Default: `.txt .md`.
+- `--store` — where to save the local results file.
+  Default: `.semantic_deduper_store.json`.
+
+## Step 2: Export a CSV report
+
+Turn the saved results into a spreadsheet-friendly report:
 
 ```bash
 semantic-deduper report --store .semantic_deduper_store.json --output dupes.csv
 ```
 
-The CSV has one row per candidate pair: group id, file indexes, similarity
-score, and the two file paths. Review the groups, then decide what to keep,
-merge, or delete.
+Open `dupes.csv` in Excel, Google Sheets, Numbers, or any text editor. Each row
+is one candidate pair:
 
-### Options
+| group_id | file_a_index | file_b_index | similarity | file_a | file_b |
+|----------|--------------|--------------|------------|--------|--------|
+| 1 | 3 | 7 | 0.9899 | ./notes/meeting.md | ./notes/meeting_copy.md |
 
-`scan`
-- `directory` — folder to scan (default: current directory)
-- `--threshold` — similarity floor, 0.0–1.0 (default: 0.85)
-- `--min-length` — ignore files shorter than this many characters (default: 20)
-- `--extensions` — file extensions to include (default: `.txt .md`)
-- `--store` — local JSON store path (default: `.semantic_deduper_store.json`)
+- `group_id` — notes linked together (if A matches B and B matches C, they all
+  share one group id).
+- `similarity` — how alike the two notes are, from 0.0 to 1.0.
+- `file_a` / `file_b` — the two file paths to compare.
 
-`report`
-- `--store` — local JSON store path (default: `.semantic_deduper_store.json`)
-- `--output` — CSV report path (default: `dedupe_report.csv`)
+Review the groups, then keep, merge, or delete as you like.
 
 ## How it works
 
-1. `scan` reads every text file in the folder.
-2. Pairs too short or too different in length are skipped cheaply.
-3. Remaining pairs get a shingle pre-filter, then an exact
+1. `scan` reads every `.txt` and `.md` file in your folder.
+2. It skips files too short or too different in size to possibly match.
+3. Remaining pairs get a fast shingle check, then an exact
    `difflib.SequenceMatcher` similarity score.
-4. Pairs above the threshold are clustered into groups (if A matches B and B
-   matches C, all three form one review group).
-5. Results are saved locally as JSON; `report` renders them to CSV.
+4. Pairs above your threshold are clustered into groups (A matches B, B
+   matches C → all three in one group).
+5. Results are saved locally as JSON; `report` writes them to CSV.
 
-Everything stays on your machine. No data is ever uploaded, and no keys or
-secrets are required.
+Everything stays on your machine. Nothing is uploaded. No keys or secrets are
+ever needed.
 
 ## Tests
 
@@ -92,7 +111,8 @@ pip install pytest
 pytest
 ```
 
-Tests cover the fuzzy matcher, grouping logic, and directory scanner.
+Tests cover the fuzzy matcher, the grouping logic, and the directory scanner.
+15 tests, all passing.
 
 ## License
 
@@ -101,8 +121,12 @@ MIT. Copyright (c) 2026 Asdale Dynamics, LLC. See `LICENSE`.
 ## About Asdale Dynamics, LLC
 
 Asdale Dynamics, LLC is an Indiana LLC founded by Dylan Asdale, a registered
-nurse turned AI author and founder of ASDALE DYNAMICS, LLC. The LLC focuses on
-beginner-friendly AI education, books and guides, and practical tools that can
-be published or sold — from local AI utilities and prompt tools to small
-business and author helpers. This CLI is one of those open-source tools: clear,
-warm, polished, tested, local-first, and free of secrets or personal data.
+nurse turned AI author and founder of ASDALE DYNAMICS, LLC. Dylan's book
+*The Massive AI Manual* and hub site dylanasdale.github.io explain AI "like a
+friend would": plain English, step by step, never condescending.
+
+The LLC focuses on beginner-friendly AI education, books and guides, and
+practical tools it can publish or sell — from local AI utilities and prompt
+tools to small business and author helpers. This CLI is one of those tools:
+clear, warm, polished, tested, local-first, and free of secrets or personal
+data.

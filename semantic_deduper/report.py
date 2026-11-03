@@ -4,7 +4,11 @@ import csv
 import os
 from typing import Iterable
 
-from .matcher import Match
+
+def _item_path(item) -> str:
+    if isinstance(item, dict):
+        return item.get("path", str(item))
+    return getattr(item, "path", str(item))
 
 
 def write_report(
@@ -38,19 +42,14 @@ def write_report(
             ]
         )
         for index_a, index_b, similarity in pairs:
-            def _path(item):
-                if isinstance(item, dict):
-                    return item.get("path", str(item))
-                return getattr(item, "path", str(item))
-
             writer.writerow(
                 [
                     group_of.get(index_a, ""),
                     index_a,
                     index_b,
                     f"{similarity:.4f}",
-                    _path(files[index_a]),
-                    _path(files[index_b]),
+                    _item_path(files[index_a]),
+                    _item_path(files[index_b]),
                 ]
             )
     return output_path

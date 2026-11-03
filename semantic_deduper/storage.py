@@ -23,6 +23,8 @@ class ScanStore:
 
     @classmethod
     def from_dict(cls, data: dict) -> "ScanStore":
+        if not isinstance(data, dict):
+            raise ValueError("store JSON must be an object")
         return cls(
             scanned_at=data.get("scanned_at", ""),
             directory=data.get("directory", ""),

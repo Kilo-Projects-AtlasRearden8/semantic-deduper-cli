@@ -7,7 +7,7 @@ import os
 import sys
 from typing import Optional
 
-from .grouping import group_duplicates, groups_to_pairs
+from .grouping import group_duplicates
 from .matcher import find_near_duplicates
 from .report import write_report
 from .scanner import scan_directory
@@ -132,8 +132,6 @@ def _write_empty_store(path: str, directory: str, threshold: float, min_length: 
 
 
 def cmd_report(args: argparse.Namespace) -> int:
-    import os
-
     store = load_store(args.store)
     if store is None:
         print(f"error: no store found at {args.store} (run `semantic-deduper scan` first)")
@@ -153,7 +151,6 @@ def main(argv: Optional[list[str]] = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     if args.command == "scan":
-        import os
         return cmd_scan(args)
     if args.command == "report":
         return cmd_report(args)
